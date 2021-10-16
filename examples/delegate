@@ -1,0 +1,38 @@
+#!/usr/bin/env raku
+
+
+use Cro::HTTP::Router;
+use Cro::HTTP::Server;
+use JSON::Class;
+use Cro::HTTP::BodyParser::JSONClass;
+
+
+class HelloClass does JSON::Class {
+    has Str $.firstname;
+    has Str $.lastname;
+
+    method hello(--> Str ) {
+        "Hello, $.firstname() $.lastname()";
+    }
+
+}
+my $app = route {
+    delegate 'hello' => route {
+        body-parser Cro::HTTP::BodyParser::JSONClass[HelloClass];
+        post ->  {
+            request-body -> $hello {
+                content 'text/plain', $hello.hello;
+            }
+        }
+    }
+};
+
+my Cro::Service $service = Cro::HTTP::Server.new(:host<127.0.0.1>, :port<7798>, application => $app);
+
+$service.start;
+
+react  { whenever signal(SIGINT) { $service.stop; exit; } }
+
+
+
+# vim: ft=raku
