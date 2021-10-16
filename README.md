@@ -2,6 +2,8 @@
 
 Parse and deserialise application/json HTTP body to a specified JSON::Class
 
+[![CI](https://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass/actions/workflows/main.yml/badge.svg)](https://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass/actions/workflows/main.yml)
+
 ## Synopsis
 
 ```raku
