@@ -19,8 +19,8 @@ jobs:
     - name: Raku version
       run: raku -v
 
-    - name: Update zef
-      run:  zef install --force-install Test::META
+    - name: Install Test::META
+      run:  zef install --force-install --/test Test::META
 
     - name: Install dependencies
       run: zef install --deps-only --/test --test-depends .
