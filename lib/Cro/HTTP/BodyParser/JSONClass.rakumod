@@ -27,8 +27,14 @@ class HelloClass does JSON::Class {
     }
 
 }
+
+# This intermediate class is only necessary in older rakudo, as of
+# 2021.09 the parameterised role can be use directly
+class SomeBodyParser does Cro::HTTP::BodyParser::JSONClass[HelloClass] {
+}
+
 my $app = route {
-    body-parser Cro::HTTP::BodyParser::JSONClass[HelloClass];
+    body-parser SomeBodyParser;
     post -> 'hello' {
         request-body -> $hello {
             content 'text/plain', $hello.hello;
@@ -58,7 +64,7 @@ block so other routes keep the default behaviour or have parsers parameterised t
 
 my $app = route {
     delegate 'hello' => route {
-        body-parser Cro::HTTP::BodyParser::JSONClass[HelloClass];
+        body-parser SomeBodyParser;
         post ->  {
             request-body -> $hello {
                 content 'text/plain', $hello.hello;

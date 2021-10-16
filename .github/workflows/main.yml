@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: croservices/cro-http:0.8.5
+      image: croservices/cro-http:0.8.6
 
     steps:
     - uses: actions/checkout@v2
