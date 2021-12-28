@@ -1,0 +1,27 @@
+#!/usr/bin/env raku
+
+use Cro::HTTP::Client;
+use JSON::Class;
+use Cro::HTTP::BodyParser::JSONClass;
+
+class HelloClass does JSON::Class {
+    has Str $.firstname;
+    has Str $.lastname;
+
+    method hello(--> Str) {
+        "Hello, $.firstname() $.lastname()";
+    }
+}
+
+my $client1 = Cro::HTTP::Client.new: body-parsers => [Cro::HTTP::BodyParser::JSONClass[HelloClass]];
+my $obj1 = await $client1.get-body: 'https://jsonclass.free.beeceptor.com/hello';
+say $obj1.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤
+
+# Setting the JSON class after creating an instance of Cro::HTTP::Client
+my $body-parser = Cro::HTTP::BodyParser::JSONClass.new;
+my $client2 = Cro::HTTP::Client.new: body-parsers => [$body-parser];
+$body-parser.set-json-class: HelloClass;
+my $obj2 = await $client2.get-body: 'https://jsonclass.free.beeceptor.com/hello';
+say $obj2.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤

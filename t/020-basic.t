@@ -1,15 +1,10 @@
 #!/usr/bin/env raku
 
 use Test;
-use Cro::HTTP::Request;
+use Cro::HTTP::Test;
 use Cro::HTTP::Router;
 use JSON::Class;
 use Cro::HTTP::BodyParser::JSONClass;
-
-sub body-text(Cro::HTTP::Response $r) {
-    $r.body-byte-stream.list.map(*.decode('utf-8')).join
-}
-
 
 class TestClass does JSON::Class {
     has $.a;
@@ -19,8 +14,14 @@ class TestClass does JSON::Class {
 class MyParser does Cro::HTTP::BodyParser::JSONClass[TestClass] {
 }
 
+my $content = '{"a": "first", "b": "second"}';
+
 my $app = route {
     body-parser MyParser;
+
+    get -> 'parser' {
+        content 'application/json', $content;
+    }
 
     post -> 'parser' {
         request-body -> $body {
@@ -28,20 +29,40 @@ my $app = route {
         }
     }
 }
-my $source = Supplier.new;
-my $responses = $app.transformer($source.Supply).Channel;
 
-my $t = TestClass.new(a => "lala", b => "po");
-my $content = $t.to-json.encode;
+diag 'Testing the json class body parser on server';
+test-service $app, {
+    test-given '/parser', {
+        test get,
+             status => 200, content-type => 'application/json',
+             body => { :a<first>, :b<second> };
 
-{
-my $req = Cro::HTTP::Request.new(:method<POST>, :target</parser>);
-$req.append-header('Content-type', 'application/json');
-$req.append-header('Content-length', $content.bytes);
-$req.set-body-byte-stream(supply { emit $content });
-$source.emit($req);
-my $r =  $responses.receive;
-is body-text($r), 'test-parser: TestClass, a: lala, b: po', 'The body-parser successfully created the correct class';
+        test post(json => { :a<first>, :b<second> }),
+             status => 200, content-type => 'text/plain',
+             body-text => 'test-parser: TestClass, a: first, b: second';
+    }
+}
+
+diag 'Testing the json class body parser on client';
+test-service $app, body-parsers => [MyParser], {
+    test get('/parser'),
+         status => 200, content-type => 'application/json',
+         body => * eqv TestClass.new: :a<first>, :b<second>;
+}
+
+diag 'Testing instance of json class body parser on client [set-json-class]';
+my Cro::HTTP::BodyParser::JSONClass $my-parser .= new;
+test-service $app, body-parsers => [$my-parser], {
+    test-given '/parser', {
+        test get,
+             status => 200, content-type => 'application/json',
+             body => * eqv JSON::Class.new;
+
+        $my-parser.set-json-class: TestClass;
+        test get,
+             status => 200, content-type => 'application/json',
+             body => * eqv TestClass.new: :a<first>, :b<second>;
+    }
 }
 
 done-testing;

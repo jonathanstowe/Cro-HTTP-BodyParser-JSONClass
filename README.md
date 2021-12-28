@@ -44,6 +44,25 @@ $service.start;
 react  { whenever signal(SIGINT) { $service.stop; exit; } }
 ```
 
+```raku
+use Cro::HTTP::Client;
+use JSON::Class;
+use Cro::HTTP::BodyParser::JSONClass;
+
+my $client1 = Cro::HTTP::Client.new: body-parsers => [Cro::HTTP::BodyParser::JSONClass[HelloClass]];
+my $obj1 = await $client1.get-body: 'https://jsonclass.free.beeceptor.com/hello';
+say $obj1.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤
+
+# Setting the JSON class after creating an instance of Cro::HTTP::Client
+my $body-parser = Cro::HTTP::BodyParser::JSONClass.new;
+my $client2 = Cro::HTTP::Client.new: body-parsers => [$body-parser];
+$body-parser.set-json-class: HelloClass;
+my $obj2 = await $client2.get-body: 'https://jsonclass.free.beeceptor.com/hello';
+say $obj2.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤
+```
+
 ## Description
 
 This provides a specialised [Cro::BodyParser](https://cro.services/docs/reference/cro-http-router#Adding_custom_request_body_parsers) that will parse a JSON ('application/json') request body to the specified
@@ -79,6 +98,8 @@ class SomeBodyParser does Cro::HTTP::BodyParser::JSONClass[HelloClass] {
 ```
 
 And then use `SomeBodyParser` in place of `Cro::HTTP::BodyParser::JSONClass`.
+
+The BodyParser has a `set-json-class` method which can be used to set the `JSON::Class` class to another class whenever needed.
 
 ## Installation
 

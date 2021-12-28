@@ -10,7 +10,7 @@ Cro::HTTP::BodyParser::JSONClass - Parse and deserialise application/json HTTP b
 
 =head1 SYNOPSIS
 
-=begin code
+=begin code :lang<raku>
 
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
@@ -47,6 +47,26 @@ my Cro::Service $service = Cro::HTTP::Server.new(:host<127.0.0.1>, :port<7798>, 
 $service.start;
 
 react  { whenever signal(SIGINT) { $service.stop; exit; } }
+
+=end code
+
+=begin code :lang<raku>
+use Cro::HTTP::Client;
+use JSON::Class;
+use Cro::HTTP::BodyParser::JSONClass;
+
+my $client1 = Cro::HTTP::Client.new: body-parsers => [Cro::HTTP::BodyParser::JSONClass[HelloClass]];
+my $obj1 = await $client1.get-body: 'https://api.example.com/hello';
+say $obj1.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤
+
+# Setting the JSON class after creating an instance of Cro::HTTP::Client
+my $body-parser = Cro::HTTP::BodyParser::JSONClass.new;
+my $client2 = Cro::HTTP::Client.new: body-parsers => [$body-parser];
+$body-parser.set-json-class: HelloClass;
+my $obj2 = await $client2.get-body: 'https://api.example.com/hello';
+say $obj2.raku;
+=output HelloClass.new(firstname => "fname", lastname => "lname")␤
 
 =end code
 
@@ -88,10 +108,12 @@ class SomeBodyParser does Cro::HTTP::BodyParser::JSONClass[HelloClass] {
 
 And then use C<SomeBodyParser> in place of C<Cro::HTTP::BodyParser::JSONClass>.
 
+The BodyParser has a C<set-json-class> method which can be used to set the C<JSON::Class> class to another class whenever needed.
+
 =end pod
 
 
-role Cro::HTTP::BodyParser::JSONClass[JSON::Class ::JC] does Cro::BodyParser {
+role Cro::HTTP::BodyParser::JSONClass[JSON::Class $json-class? is copy] does Cro::BodyParser {
     method is-applicable(Cro::HTTP::Message $message --> Bool) {
         with $message.content-type {
             .type eq 'application' && .subtype eq 'json' || .suffix eq 'json'
@@ -106,9 +128,13 @@ role Cro::HTTP::BodyParser::JSONClass[JSON::Class ::JC] does Cro::BodyParser {
             my $payload = Blob.new;
             whenever $message.body-byte-stream -> $blob {
                 $payload ~= $blob;
-                LAST emit JC.from-json($payload.decode('utf-8'));
+                LAST emit $json-class.from-json($payload.decode('utf-8'));
             }
         })
+    }
+
+    method set-json-class(JSON::Class $class) {
+        $json-class = $class;
     }
 }
 
