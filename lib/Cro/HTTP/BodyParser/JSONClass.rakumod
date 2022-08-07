@@ -50,7 +50,10 @@ react  { whenever signal(SIGINT) { $service.stop; exit; } }
 
 =end code
 
+Or with a `Cro::HTTP::Client`:
+
 =begin code :lang<raku>
+
 use Cro::HTTP::Client;
 use JSON::Class;
 use Cro::HTTP::BodyParser::JSONClass;
@@ -66,6 +69,7 @@ my $client2 = Cro::HTTP::Client.new: body-parsers => [$body-parser];
 $body-parser.set-json-class: HelloClass;
 my $obj2 = await $client2.get-body: 'https://api.example.com/hello';
 say $obj2.raku;
+
 =output HelloClass.new(firstname => "fname", lastname => "lname")␤
 
 =end code
@@ -137,4 +141,3 @@ role Cro::HTTP::BodyParser::JSONClass[JSON::Class $json-class? is copy] does Cro
         $json-class = $class;
     }
 }
-

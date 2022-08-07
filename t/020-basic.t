@@ -30,7 +30,6 @@ my $app = route {
     }
 }
 
-diag 'Testing the json class body parser on server';
 test-service $app, {
     test-given '/parser', {
         test get,
@@ -43,14 +42,12 @@ test-service $app, {
     }
 }
 
-diag 'Testing the json class body parser on client';
 test-service $app, body-parsers => [MyParser], {
     test get('/parser'),
          status => 200, content-type => 'application/json',
          body => * eqv TestClass.new: :a<first>, :b<second>;
 }
 
-diag 'Testing instance of json class body parser on client [set-json-class]';
 my Cro::HTTP::BodyParser::JSONClass $my-parser .= new;
 test-service $app, body-parsers => [$my-parser], {
     test-given '/parser', {
