@@ -1,38 +1,38 @@
 {
-  "name": "Cro::HTTP::BodyParser::JSONClass",
-  "version": "0.0.1",
-  "auth": "github:jonathanstowe",
-  "api" : "0.1",
-  "source-url": "git://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass.git",
+  "api": "0.1",
+  "resources": [
+  ],
   "tags": [
-     "json",
-     "class",
-     "http",
-     "parser"
+    "json",
+    "class",
+    "http",
+    "parser"
   ],
-  "test-depends": [
-     "Cro::HTTP::Test"
+  "depends": [
+    "Cro::BodyParser",
+    "Cro::HTTP"
   ],
-  "meta-version": "0",
+  "description": "Parse and deserialise application/json HTTP body to a specified JSON::Class",
   "build-depends": [
   ],
-  "raku": "6.d",
-  "depends": [
-     "Cro::BodyParser",
-     "Cro::HTTP"
+  "test-depends": [
+    "Cro::HTTP::Test"
   ],
   "provides": {
-     "Cro::HTTP::BodyParser::JSONClass" : "lib/Cro/HTTP/BodyParser/JSONClass.rakumod"
+    "Cro::HTTP::BodyParser::JSONClass": "lib/Cro/HTTP/BodyParser/JSONClass.rakumod"
   },
+  "support": {
+    "source": "git://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass.git",
+    "email": "jns+gh@gellyfish.co.uk"
+  },
+  "auth": "zef:jonathanstowe",
+  "source-url": "git://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass.git",
+  "raku": "6.d",
+  "meta-version": "0",
+  "name": "Cro::HTTP::BodyParser::JSONClass",
   "authors": [
     "Jonathan Stowe <jns+gh@gellyfish.co.uk>"
   ],
-  "support": {
-    "email": "jns+gh@gellyfish.co.uk",
-    "source": "git://github.com/jonathanstowe/Cro-HTTP-BodyParser-JSONClass.git"
-  },
-  "resources": [
-  ],
   "license": "Artistic-2.0",
-  "description": "Parse and deserialise application/json HTTP body to a specified JSON::Class"
+  "version": "0.0.2"
 }
