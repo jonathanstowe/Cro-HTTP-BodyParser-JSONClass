@@ -19,6 +19,9 @@ jobs:
     - name: Raku version
       run: raku -v
 
+    - name: update zef
+      run:  zef install --force-install --/test https://github.com/ugexe/zef.git
+
     - name: Install Test::META
       run:  zef install --force-install --/test Test::META
 
