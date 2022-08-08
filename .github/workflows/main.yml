@@ -11,13 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: croservices/cro-http:0.8.6
+      image: rakudo-star:latest
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Raku version
       run: raku -v
+
+    - name: Install an SSL
+      run: apt-get -qq update && apt-get -qq install -y libssl1.1 libssl-dev openssl
 
     - name: update zef
       run:  zef install --force-install --/test https://github.com/ugexe/zef.git
